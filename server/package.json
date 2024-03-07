@@ -1,0 +1,24 @@
+{
+  "name": "server",
+  "version": "1.0.0",
+  "description": "",
+  "main": "server.js",
+  "scripts": {
+    "start": "node --env-file=.env server.js",
+    "dev": "node --env-file=.env server.js"
+  },
+  "type": "module",
+  "author": "",
+  "license": "ISC",
+  "dependencies": {
+    "@langchain/anthropic": "^0.0.10",
+    "@langchain/community": "^0.0.35",
+    "@langchain/core": "^0.1.30",
+    "@langchain/openai": "^0.0.14",
+    "axios": "^1.6.7",
+    "cors": "^2.8.5",
+    "express": "^4.18.2",
+    "langchain": "^0.1.18",
+    "nodemon": "^3.1.0"
+  }
+}

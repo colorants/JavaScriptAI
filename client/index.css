@@ -1,0 +1,78 @@
+@import url("https://fonts.googleapis.com/css2?family=Kode+Mono:wght@400..700&display=swap");
+@import url("https://fonts.googleapis.com/css2?family=Gochi+Hand&family=Indie+Flower&display=swap");
+
+
+@tailwind base;
+@tailwind components;
+@tailwind utilities;
+
+@layer base {
+    body {
+        background-image: url('assets/background.jpg');
+        background-size: 100vw 100vh;
+        background-repeat: no-repeat;
+    }
+}
+
+@font-face {
+    font-family: "Baby Doll";
+    src: url("assets/fonts/Baby Doll.otf") format("truetype");
+}
+
+body {
+    font-family: "ELEGANT TYPEWRITER Regular", monospace;
+}
+
+#messageInput{
+    min-width: 30vw;
+    width: 30vw;
+}
+
+#loadingSpinner {
+    opacity:1;
+}
+
+#container1 {
+    opacity: 0.95;
+    flex-direction: column;
+    max-height: 70vh;
+    max-width: 70vw;
+    margin-top:10vh;
+}
+
+#container2 {
+    opacity: 0.95;
+    flex-direction: column;
+    max-height: 70vh;
+    max-width: 30vw;
+    margin-top:10vh;
+}
+
+.response-grid {
+    display: grid;
+    grid-template-columns: auto 1fr; /* Auto for loading spinner, 1fr for response text */
+    align-items: center;
+}
+
+#loadingSpinner {
+    margin-right: 10px; /* Adjust margin as needed */
+}
+
+@keyframes spin {
+    to {
+        transform: rotate(360deg);
+    }
+}
+
+#cat-logo-left:hover {
+    offset-anchor: center;
+    animation: spin 1s linear infinite; /* Adjust the duration and timing function as needed */
+}
+
+#catfit-h1 {
+    text-underline-offset: 6px;
+    font-family: "Kode Mono", sans serif;
+
+}
+
+
