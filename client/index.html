@@ -16,22 +16,13 @@
 <!-- CatFit Logo -->
 <a href="https://www.youtube.com/watch?v=wh9QLjk3M2k" target="_blank">
     <img id="cat-logo-left" src="assets/cat-icon.png" alt="CatFit Logo"
-         class="cursor-grab max-h-20 fixed top-0 left-0 p-1">
+         class="cursor-grab max-h-20 fixed top-0 left-1 p-1">
 </a>
 
 <!-- Info icon -->
 <a href="https://www.youtube.com/watch?v=wh9QLjk3M2k" target="_blank" class="">
     <i class="fa-solid fa-info-circle text-2xl text-black fixed m-2 bottom-0 right-0"></i>
 </a>
-
-<!-- Server status -->
-<div id="serverStatus" class="fixed bottom-0 left-0 bg-white opacity-60 rounded-tr-lg p-1">
-    <div class="flex items-center text-sm font-bold px-1 py-1" role="alert">
-        <i class="fa-solid fa-globe pr-2"></i>
-        <p id="serverStatusText"></p>
-    </div>
-</div>
-
 <!-- Chat Container -->
 <div id="container1" class="container shadow-lg m-auto p-1 bg-cyan-700 rounded text-black">
     <div id="chatContainer" class="flex flex-col items-center mb-4">
@@ -39,27 +30,36 @@
 
         <div class="mb-4">
             <!-- Chat Input Section -->
-            <label for="messageInput" class="block text-sm font-medium text-gray-700 mb-2">Where are you going:</label>
+            <div id="firstPrompt">
+            <label for="messageInput" class="block text-sm font-medium text-gray-700 mb-1">Where are you going:</label>
+                <p class="text-xs mb-1">BBQ, Party, Work, Date, Wedding, Funeral, Other</p>
             <input type="text" id="messageInput" class="w-full p-2 border rounded-md text-black mb-2"
                    placeholder="Type your message"/>
 
-            <label for="userGender" class="block text-sm font-medium text-gray-700 mb-2">What is your gender:</label>
+            <label for="userGender" class="block text-sm font-medium text-gray-700 mb-1">What is your gender:</label>
+                <p class="text-xs mb-1">This is to recommend a dress for example</p>
             <input type="text" id="userGender" class="w-full p-2 border rounded-md text-black mb-2"
                    placeholder="Your gender"/>
 
-            <label for="userLocation" class="inline text-sm font-medium text-gray-700">What is your location:</label>
-            <p class="text-xs">This is to see the temperature</p>
-            <input type="text" id="userLocation" class="w-full p-2 border rounded-md text-black mb-2"
-                   placeholder="Your location"/>
+            <label for="userLocation" class="inline text-sm font-medium text-gray-700 mb-1">What is your location:</label>
+            <p class="text-xs mb-1">This is to see the temperature</p>
+            <input type="text" id="userLocation" class="w-full p-2 border rounded-md text-black mb-2" placeholder="Your location"/>
+            </div>
+            <div id="replyContainer" class="hidden">
+            <label for="userReply" class="block text-sm font-medium text-gray-700 mb-2">Changes you would like to make:</label>
+            <input type="text" id="userReply" class="w-full p-2 border rounded-md text-black mb-2"
+                   placeholder="Your reply"/>
+            </div>
+
 
 
             <div class="flex justify-center items-center">
-            <button id="submitButton" onclick="retrieveMessage()"
-                    class="flex justify-center mt-2 h-10 w-30 px-6 py-2 text-white rounded-md bg-blue-500 hover:bg-blue-600">Submit</button>
+                <button id="submitButton" onclick="retrieveMessage()"
+                        class="flex justify-center mt-2 h-10 w-30 px-6 py-2 text-white rounded-md bg-blue-500 hover:bg-blue-600">Submit</button>
 
-            <div id="loadingSpinner" class="mt-2 bg-blue-500">
-                <img src="assets/loading-spinner.gif" alt="loading gif" class="h-10 px-6 w-30 text-white rounded-md">
-            </div>
+                <div id="loadingSpinner" class="mt-2 bg-blue-500">
+                    <img src="assets/loading-spinner.gif" alt="loading gif" class="h-10 px-6 w-30 text-white rounded-md">
+                </div>
             </div>
 
 
@@ -69,30 +69,31 @@
 
 <!-- Suggestion container -->
 <div id="container2" class="container mx-auto shadow-lg bg-cyan-700 rounded text-black">
-    <div id="suggestionContainer" class="flex flex-col items-center mb-4">
+    <div id="suggestionContainer" class="flex flex-col items-center">
         <div class="flex">
-    <h2 id="suggestion-h2" class="text-1xl font-bold ">Help! </h2>
-        <p class="ml-2">  Things I can help you with:</p>
+            <h2 id="suggestion-h2" class="text-1xl font-bold ">Help! </h2>
+            <p class="ml-2">  Things I can help you with:</p>
         </div>
-            <ul class="m-2">
-            </ul>
+        <ul class="m-2">
+        </ul>
 
     </div>
 </div>
 
-<div id="container3" class="container mx-auto shadow-lg bg-cyan-700 rounded text-black">
+<!-- AiResponse container -->
+<div id="container3" class="container pl-1 m-3 left-0 shadow-lg bg-cyan-800 text-black hidden">
     <div id="responseContainer" class="flex flex-col items-center mb-4">
-        <h2 id="response-h2" class="text-1xl font-bold mt-3">Response: </h2>
-        <div id="response" class="text-1xl font-bold "></div>
+        <div id="response" class="text-1xl font-bold mt-3">
+
+        </div>
     </div>
 </div>
 
 
-
-
-
-
-
+<!-- Footer -->
+<footer class="text-center text-white p-2 bg-cyan-700 fixed bottom-0 w-full">
+    <p class="text-xs "> 2024 CatFit - <a href="https://github.com/colorants" class="hover:cursor-crosshair" target="_blank">Viggo van der Ven</a></p>
+</footer>
 <script src="scripts.js" defer></script>
 </body>
 

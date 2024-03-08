@@ -9,47 +9,47 @@ const router = express.Router();
 app.use(express.json());
 app.use(cors()); // Enable CORS for all routes
 
-let isModelInitialized = false;
-
 router.post('/chat', async (req, res) => {
     try {
-
-const userInput = req.body.userInput;
-const userGender = req.body.userGender;
-const location = req.body.userLocation;
+        const userInput = req.body.userInput;
+        const userGender = req.body.userGender;
+        const userLocation = req.body.location; // Retrieve user's location from the request body
 
         // Get local weather information using the OpenWeatherMap API
         const weatherApiKey = process.env.WEATHER_API_KEY;
-        const weatherApiUrl = `http://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${location}`;
+        const weatherApiUrl = `https://api.weatherapi.com/v1/current.json?key=${weatherApiKey}&q=${userLocation}`;
         const weatherResponse = await axios.get(weatherApiUrl);
 
-        let temperature = weatherResponse.data.current.temp_c;
-        let weatherDescription = weatherResponse.data.current.condition.text;
+        if (weatherResponse.status !== 200) {
+            throw new Error(`Weather API request failed with status: ${weatherResponse.status}`);
+        }
 
+        const temperature = weatherResponse.data.current.temp_c;
+        const weatherDescription = weatherResponse.data.current.condition.text;
 
+        const model = new ChatOpenAI({
+            temperature: 0.1,
+            azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
+            azureOpenAIApiVersion: process.env.OPENAI_API_VERSION,
+            azureOpenAIApiInstanceName: process.env.INSTANCE_NAME,
+            azureOpenAIApiDeploymentName: process.env.ENGINE_NAME,
+        });
 
-    const model = new ChatOpenAI({
-    temperature: 0.1,
-    azureOpenAIApiKey: process.env.AZURE_OPENAI_API_KEY,
-    azureOpenAIApiVersion: process.env.OPENAI_API_VERSION,
-    azureOpenAIApiInstanceName: process.env.INSTANCE_NAME,
-    azureOpenAIApiDeploymentName: process.env.ENGINE_NAME,
-});
-// Assuming that the ChatOpenAI constructor internally initializes the model
-isModelInitialized = true;
         const promptTemplate =
-            `Make a recommendation for an outfit for a {userGender} who is going {userInput}.
-            The current local weather is ${temperature}°C with ${weatherDescription}.
-            Respond like the cat from Puss in Boots in the movie Shrek. Also make it maximum 30 words long.
-            And don't reply back the question.`;
-
+            `Make a recommendation for an outfit for a {userGender} who is going to {userInput}.
+            The current local weather is ${temperature}°C with ${weatherDescription} tell the user this outcome.
+            Respond like the cat from Puss in Boots in the movie Shrek. Also make it maximum 50 words long.
+           Also when you describe what the weather is going to be, repeat back the temperature and 
+           weather description. example "It's going to be sunny in Paris". Don't give an answer in quotes.
+            
+            `;
 
         const prompt = promptTemplate
-            .replace ("{userGender}", userGender)
-            .replace ("{userInput}", userInput);
-
+            .replace("{userGender}", userGender)
+            .replace("{userInput}", userInput);
 
         const response = await model.invoke(prompt);
+
         console.log(JSON.stringify(response));
 
         res.json(response);
@@ -60,13 +60,6 @@ isModelInitialized = true;
     }
 });
 
-app.get('/status', (req, res) => {
-    if (isModelInitialized ) {
-        res.status(200).json({ status: 'ok', message: 'Server is online' });
-    } else {
-        res.status(500).json({ status: 'error', message: 'OpenAI model is not initialized' });
-    }
-});
 
 // Delays
 function getRandomDelay(min, max) {

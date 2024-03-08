@@ -1,15 +1,15 @@
 const messageInput = document.getElementById('messageInput');
+const firstPrompt = document.getElementById('firstPrompt');
 const userGender = document.getElementById('userGender');
 const userLocation = document.getElementById('userLocation');
 const submitButton = document.getElementById('submitButton');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const responseContainer = document.getElementById('responseContainer');
 const responseText = document.getElementById('responseText');
-const serverStatusText = document.getElementById('serverStatusText');
-const container2 = document.getElementById('container2');
+const suggestionContainer = document.getElementById('container2');
 const container3 = document.getElementById('container3');
+const replyContainer = document.getElementById('replyContainer');
 
-container3.style.display = 'none';
 loadingSpinner.style.display = 'none';
 loadingSpinner.style.display = 'items-center';
 
@@ -24,34 +24,11 @@ document.addEventListener('keydown', function (event) {
 
 document.addEventListener('DOMContentLoaded', async () => {
     try {
-        await checkServerStatus();
-        await updateServerStatus();
         await fillSuggestions();
     } catch (error) {
         console.error('Error on DOMContentLoaded:', error);
     }
 });
-
-async function checkServerStatus() {
-    try {
-        const response = await fetch('http://localhost:8001/status');
-        const { status, message } = await response.json();
-
-        if (status === 'ok') {
-            updateServerStatus('Connected', 'green', message);
-        } else {
-            updateServerStatus('Disconnected', 'rgb(220, 20, 60)', message);
-        }
-    } catch (error) {
-        console.error('Error checking server status:', error);
-        updateServerStatus('Disconnected', 'rgb(220, 20, 60)', 'Error checking server status');
-    }
-}
-
-function updateServerStatus(statusText, color) {
-    serverStatusText.textContent = statusText;
-    serverStatusText.style.color = color;
-}
 
 async function fillSuggestions() {
     try {
@@ -83,20 +60,20 @@ function shuffleArray(array) {
     return shuffledArray;
 }
 
-async function sendChatMessage(message, gender, location) {
+async function sendChatMessage(message, gender, userLocation) {
     try {
-        if (message !== "" || gender !== "" || location !== "") {
+        if (message !== "" || gender !== "" || userLocation !== "") {
             const response = await fetch('http://localhost:8001/chat', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
                 },
-                body: JSON.stringify({ userInput: message, userGender: gender, userLocation: location}),
+                body: JSON.stringify({ userInput: message, userGender: gender, location: userLocation}),
             });
-
             if (!response.ok) {
                 throw new Error(`HTTP error! Status: ${response.status}`);
             }
+
 
             const responseData = await response.json();
 
@@ -105,7 +82,6 @@ async function sendChatMessage(message, gender, location) {
                 displayAiResponse(aiResponseContent);
             } else {
                 console.error('No valid AI response found in the response:', responseData);
-                responseText.innerText = 'No valid AI response found.';
             }
 
             return responseData.response;
@@ -136,64 +112,48 @@ function displayAiResponse(aiResponseContent) {
 
 
 async function retrieveMessage() {
-    container3.style.display = 'none';
-    messageInput.disabled = true;
-    userGender.disabled = true;
-    userLocation.disabled = true;
-    submitButton.disabled = true;
-    loadingSpinner.style.display = 'block';
+    suggestionContainer.style.display = 'none';
     submitButton.style.display = 'none';
-    container2.style.display = 'none';
+    firstPrompt.style.display = 'none';
 
     const message = messageInput.value.trim();
     const gender = userGender.value.trim();
-    const location = userLocation.value
+    const userLocationValue = userLocation.value.trim();
 
     try {
-        if (message === '' || gender === '' || location === '') {
-            throw new Error('Please fill in message, gender fields and your location. ');
+        if (message === '' || gender === '' || userLocationValue === '') {
+            suggestionContainer.style.display = 'block';
+            submitButton.style.display = 'block';
+            firstPrompt.style.display = 'block';
+            throw new Error('Please fill in message, gender fields, and your location.');
+
+        } else {
+            loadingSpinner.style.display = 'block';
+            messageInput.value = '';
+            userGender.value = '';
+            userLocation.value = '';
+            await sendChatMessage(message, gender, userLocationValue);
+
+            // Hide loading spinner and show the reply container
+            loadingSpinner.style.display = 'none';
+            replyContainer.style.display = 'block';
+            container3.style.display = 'block';
+
         }
-
-        await sendChatMessage(message, gender);
-
-        container3.style.display = 'block';
-        submitButton.disabled = false;
-        messageInput.disabled = false;
-        userGender.disabled = false;
-        userLocation.disabled = false;
-        loadingSpinner.style.display = 'none';
-        messageInput.value = '';
-        userGender.value = '';
-        userLocation.value = '';
-        submitButton.style.display = 'inline-block';
     } catch (error) {
         console.error('Error sending chat message:', error.message);
         alert(error.message);
 
-        submitButton.disabled = false;
+        // Enable input fields and show submit button
+        loadingSpinner.style.display = 'none';
+        firstPrompt.style.display = 'block';
         messageInput.disabled = false;
         userGender.disabled = false;
         userLocation.disabled = false;
-        loadingSpinner.style.display = 'none';
-        messageInput.value = '';
-        userGender.value = '';
-        userLocation.value = '';
+        submitButton.disabled = false;
         submitButton.style.display = 'inline-block';
+
     }
 }
 
-function typewriterEffect(element, text) {
-    element.textContent = "";
-    let speed = 15;
-    let i = 0;
 
-    function type() {
-        if (i < text.length) {
-            element.textContent += text.charAt(i);
-            i++;
-            setTimeout(type, speed);
-        }
-    }
-
-    type();
-}
