@@ -5,7 +5,6 @@ const userLocation = document.getElementById('userLocation');
 const submitButton = document.getElementById('submitButton');
 const loadingSpinner = document.getElementById('loadingSpinner');
 const responseContainer = document.getElementById('responseContainer');
-const responseText = document.getElementById('responseText');
 const suggestionContainer = document.getElementById('container2');
 const container3 = document.getElementById('container3');
 const replyContainer = document.getElementById('replyContainer');
@@ -62,37 +61,36 @@ function shuffleArray(array) {
 
 async function sendChatMessage(message, gender, userLocation) {
     try {
-        if (message !== "" || gender !== "" || userLocation !== "") {
-            const response = await fetch('http://localhost:8001/chat', {
-                method: 'POST',
-                headers: {
-                    'Content-Type': 'application/json',
-                },
-                body: JSON.stringify({ userInput: message, userGender: gender, location: userLocation}),
-            });
-            if (!response.ok) {
-                throw new Error(`HTTP error! Status: ${response.status}`);
-            }
-
-
-            const responseData = await response.json();
-
-            if (responseData && responseData.kwargs && responseData.kwargs.content) {
-                const aiResponseContent = responseData.kwargs.content;
-                displayAiResponse(aiResponseContent);
-            } else {
-                console.error('No valid AI response found in the response:', responseData);
-            }
-
-            return responseData.response;
-        } else {
-            responseText.innerText = 'Please enter a message.';
-            return null;
+        const userPrompt = `message: ${message}, gender: ${gender}`
+        const location = `userLocation: ${userLocation}`;
+        const response = await fetch('http://localhost:8001/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({userPrompt: userPrompt, userLocation: location}),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
         }
+
+
+        const responseData = await response.json();
+
+        if (responseData && responseData.kwargs && responseData.kwargs.content) {
+            const aiResponseContent = responseData.kwargs.content;
+            displayAiResponse(aiResponseContent);
+        } else {
+            console.error('No valid AI response found in the response:', responseData);
+        }
+
+        return responseData.response;
     } catch (error) {
-        throw new Error(`Error sending chat message: ${error.message}`);
+        console.error('Error sending chat message:', error);
+        throw error;
     }
 }
+
 
 function displayAiResponse(aiResponseContent) {
     const aiMessageContainer = document.createElement('div');
@@ -121,13 +119,6 @@ async function retrieveMessage() {
     const userLocationValue = userLocation.value.trim();
 
     try {
-        if (message === '' || gender === '' || userLocationValue === '') {
-            suggestionContainer.style.display = 'block';
-            submitButton.style.display = 'block';
-            firstPrompt.style.display = 'block';
-            throw new Error('Please fill in message, gender fields, and your location.');
-
-        } else {
             loadingSpinner.style.display = 'block';
             messageInput.value = '';
             userGender.value = '';
@@ -138,8 +129,8 @@ async function retrieveMessage() {
             loadingSpinner.style.display = 'none';
             replyContainer.style.display = 'block';
             container3.style.display = 'block';
-
-        }
+        submitButton.disabled = false;
+        submitButton.style.display = 'inline-block';
     } catch (error) {
         console.error('Error sending chat message:', error.message);
         alert(error.message);

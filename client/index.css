@@ -9,8 +9,7 @@
 @layer base {
     body {
         background-image: url('assets/background.jpg');
-        background-size: 100vw 100vh;
-        background-repeat: no-repeat;
+        background-size: cover;
     }
 }
 
@@ -23,11 +22,6 @@ body {
     font-family: "ELEGANT TYPEWRITER Regular", monospace;
 }
 
-#messageInput{
-    min-width: 30vw;
-    width: 30vw;
-}
-
 #loadingSpinner {
     opacity:1;
 }
@@ -36,8 +30,12 @@ body {
     opacity: 0.95;
     flex-direction: column;
     max-height: 70vh;
-    max-width: 70vw;
+    max-width: 55vw;
     margin-top:10vh;
+}
+
+.chatContainer {
+   max-width: 30vw;
 }
 
 #container2 {
