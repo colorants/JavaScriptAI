@@ -1,11 +1,16 @@
 {
   "devDependencies": {
     "concurrently": "^8.2.2",
-    "http-server": "^14.0.3"
+    "http-server": "^14.0.3",
+    "webpack": "^5.90.3",
+    "webpack-cli": "^5.1.4"
   },
   "scripts": {
+    "build:frontend": "webpack --config webpack.config.js",
     "start:server": "node --env-file=.env server/server.js",
     "start:frontend": "http-server client -o",
-    "start:both": "concurrently \"npm run start:server\" \"npm run start:frontend\""
+    "start:both": "concurrently \"npm run start:server\" \"npm run start:frontend\"",
+    "start:both:build": "concurrently \"npm run build:frontend\" \"npm run start:both\""
   }
+
 }

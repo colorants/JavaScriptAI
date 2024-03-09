@@ -16,7 +16,8 @@ app.use(cors()); // Enable CORS for all routes
 router.post('/chat', async (req, res) => {
     try {
         const userInput = req.body.userPrompt;
-
+        const userLocation = 'london'
+        const userReply = req.body.userReply || ''; // Set userReply to an empty string if not provided
         console.log('Received userInput:', userInput);
 
         // Get local weather information using the OpenWeatherMap API
@@ -42,17 +43,16 @@ router.post('/chat', async (req, res) => {
         const prompt = ChatPromptTemplate.fromTemplate(`
     Before recommending, check our history: {history}.
     
-    In 50 words or less, you are a chatbot that helps users with making an outfit. Your personality is like the cat from Puss in Boots in the movie Shrek.
+    In 40 words or less, you are a chatbot that helps users with making an outfit. Your personality is like the cat from Puss in Boots in the movie Shrek.
     Make a recommendation for an outfit for ${userInput}. The user gives their destination and gender.
     The current local weather is ${temperature}°C with ${weatherDescription}. Also, when you describe what the weather is going to be, repeat back the temperature and weather description.
     Example: It's going to be sunny in Paris. Don't give an answer in quotation marks.
     
     The response should be a funny but smart recommendation.
     
-    Also, the user will be able to reply to the chatbot's recommendation.
-    
-    The reply is here: ${userReply}.
+    ${userReply ? `The user replied: ${userReply}.` : 'The user has not replied yet.'}
 `);
+
 
         const upstashChatHistory = new UpstashRedisChatMessageHistory({
             sessionId: 'chat1',

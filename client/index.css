@@ -77,5 +77,29 @@ body {
     font-family: "Kode Mono", sans serif;
 
 }
+.info-container {
+    position: fixed;
+    bottom: 0;
+    right: 0;
+    display: flex;
+}
+footer {
+    z-index: 98;
+}
+.popup {
+    display: none;
+    position: absolute;
+    background-color: #fff;
+    box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+    padding: 10px;
+    border-radius: 5px;
+    z-index: 99;
+    bottom: 100%; /* Position the popup above the info icon */
+    right: 0;
+    margin-right: 50%; /* Adjust the margin to center the popup */
+    transform: translateX(50%); /* Center the popup horizontally */
+}
 
-
+.info-container:hover .popup {
+    display: block;
+}

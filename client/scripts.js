@@ -62,20 +62,29 @@ async function sendChatMessage(message, gender, userLocation, userReply) {
 }
 
 async function retrieveMessage() {
-    userReply.value='';
     suggestionContainer.style.display = 'none';
     submitButton.style.display = 'none';
     firstPrompt.style.display = 'none';
+    loadingSpinner.style.display = 'block';
+
     try {
-        loadingSpinner.style.display = 'block';
+        const aiResponseContent = await sendChatMessage(
+            messageInput.value,
+            userGender.value,
+            userLocation.value,
+            userReply.value
+        );
+
+        // Display AI response
+        displayAiResponse(aiResponseContent);
+
+        // Display user reply
+        displayUserReply(userReply.value);
+
+        userReply.value = '';
         messageInput.value = '';
         userGender.value = '';
         userLocation.value = '';
-        await sendChatMessage(
-           message,
-            gender,
-        );
-
 
         // Hide loading spinner and show the reply container
         loadingSpinner.style.display = 'none';
@@ -84,7 +93,7 @@ async function retrieveMessage() {
         submitButton.disabled = false;
         submitButton.style.display = 'inline-block';
     } catch (error) {
-        console.error('Error sending chat message:', error.message);
+        console.error('Error sending/retrieving chat message:', error.message);
         alert(error.message);
 
         suggestionContainer.style.display = 'block';
@@ -96,7 +105,6 @@ async function retrieveMessage() {
         userLocation.disabled = false;
         submitButton.disabled = false;
         submitButton.style.display = 'inline-block';
-
     }
 }
 
@@ -131,19 +139,41 @@ function shuffleArray(array) {
 }
 
 function displayAiResponse(aiResponseContent) {
-    const aiMessageContainer = document.createElement('div');
-    aiMessageContainer.classList.add('response-grid', 'col-span-3', 'mb-2');
+    const aiMessageContainer = createMessageContainer(aiResponseContent, 'ai');
+    appendToResponseContainer(aiMessageContainer, 'container3', 'ai');
 
-    const aiIcon = document.createElement('i');
-    aiIcon.classList.add('fas', 'fa-cat', 'text-black');
-    aiMessageContainer.appendChild(aiIcon);
+}
 
-    const aiText = document.createElement('p');
-    aiText.classList.add('typewriter', 'pl-4');
-    aiText.textContent = aiResponseContent;
-    aiMessageContainer.appendChild(aiText);
+function displayUserReply(userReplyContent) {
+    const userReplyContainer = createMessageContainer(userReplyContent, 'user');
+    appendToResponseContainer(userReplyContainer, 'container3', 'user');
 
-    responseContainer.appendChild(aiMessageContainer);
+}
+
+function createMessageContainer(content, messageType) {
+    const messageContainer = document.createElement('div');
+    messageContainer.classList.add('response-grid', 'col-span-3', 'mb-2', 'flex');
+
+    const messageIcon = document.createElement('i');
+    messageIcon.classList.add('fas', messageType === 'ai' ? 'fa-cat' : 'fa-user', 'text-black');
+    messageContainer.appendChild(messageIcon);
+
+    const messageText = document.createElement('p');
+    messageText.classList.add('typewriter', 'pl-4');
+    messageText.textContent = content;
+    messageContainer.appendChild(messageText);
+
+    return messageContainer;
+}
+
+function appendToResponseContainer(messageContainer, containerId, messageType) {
+    const responseContainer = document.getElementById(containerId);
+    if (responseContainer) {
+        const messageWrapper = document.createElement('div');
+        messageWrapper.classList.add('response-container', messageType);
+        messageWrapper.appendChild(messageContainer);
+        responseContainer.appendChild(messageWrapper);
+    }
 }
 
 
