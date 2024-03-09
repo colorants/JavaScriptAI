@@ -16,7 +16,8 @@ app.use(cors()); // Enable CORS for all routes
 router.post('/chat', async (req, res) => {
     try {
         const userInput = req.body.userPrompt;
-        let userLocation = 'london'
+
+        console.log('Received userInput:', userInput);
 
         // Get local weather information using the OpenWeatherMap API
         const weatherApiKey = process.env.WEATHER_API_KEY;
@@ -38,20 +39,20 @@ router.post('/chat', async (req, res) => {
             azureOpenAIApiDeploymentName: process.env.ENGINE_NAME,
         });
 
-        const prompt = ChatPromptTemplate.fromTemplate(
-           `Before recommending check our history: {history}. 
-           
-           In 50 words or less.
-           You are a chatbot that helps users with making an outfit. Your personality is like the cat from Puss in Boots in the movie Shrek.
-         Make a recommendation for an outfit for {userInput}. The user gives their destination and gender.
-        The current local weather is ${temperature}°C with ${weatherDescription} tell the user this outcome. 
-            Also when you describe what the weather is going to be, repeat back the temperature and
-        weather description. example It's going to be sunny in Paris. Don't give an answer in quotation marks.""
-       The response should be a funny but smart recommendation.
-       
-       Also the user will be able to reply to the chatbot's recommendation.
-
-    `);
+        const prompt = ChatPromptTemplate.fromTemplate(`
+    Before recommending, check our history: {history}.
+    
+    In 50 words or less, you are a chatbot that helps users with making an outfit. Your personality is like the cat from Puss in Boots in the movie Shrek.
+    Make a recommendation for an outfit for ${userInput}. The user gives their destination and gender.
+    The current local weather is ${temperature}°C with ${weatherDescription}. Also, when you describe what the weather is going to be, repeat back the temperature and weather description.
+    Example: It's going to be sunny in Paris. Don't give an answer in quotation marks.
+    
+    The response should be a funny but smart recommendation.
+    
+    Also, the user will be able to reply to the chatbot's recommendation.
+    
+    The reply is here: ${userReply}.
+`);
 
         const upstashChatHistory = new UpstashRedisChatMessageHistory({
             sessionId: 'chat1',
@@ -64,31 +65,35 @@ router.post('/chat', async (req, res) => {
         const memory = new BufferMemory({
             memoryKey: "history",
             chatHistory: upstashChatHistory,
-            input_key: 'userInput', // Specify the input key
+            input_key: 'userInput', // Specify only one input key
             output_key: 'output' // Specify the output key
         });
 
         const chain = RunnableSequence.from([
             {
                 userInput: (initialInput) => initialInput.userInput,
+                userReply: (initialInput) => initialInput.userReply,
                 memory: () => memory.loadMemoryVariables(),
             },
             {
                 userInput: (previousOutput) => previousOutput.userInput,
+                userReply: (previousOutput) => previousOutput.userReply,
                 history: (previousOutput) => previousOutput.memory.history,
             },
-           prompt,
+            prompt,
             model,
         ]);
 
+
         const airesponse = await chain.invoke({
             userInput,
+
         });
 
-        // This makes sure that the input and output are both seen as (1 key) important!
+
         let testInput = {
             userInput: userInput
-        }
+        };
         let testOutput = {
             output: airesponse
         }

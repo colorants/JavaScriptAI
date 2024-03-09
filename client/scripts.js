@@ -1,6 +1,7 @@
 const messageInput = document.getElementById('messageInput');
 const firstPrompt = document.getElementById('firstPrompt');
 const userGender = document.getElementById('userGender');
+const userReply = document.getElementById('userReply');
 const userLocation = document.getElementById('userLocation');
 const submitButton = document.getElementById('submitButton');
 const loadingSpinner = document.getElementById('loadingSpinner');
@@ -28,6 +29,76 @@ document.addEventListener('DOMContentLoaded', async () => {
         console.error('Error on DOMContentLoaded:', error);
     }
 });
+
+
+async function sendChatMessage(message, gender, userLocation, userReply) {
+    try {
+        const userPrompt = `message: ${message}, gender: ${gender}, userLocation: ${userLocation}, reply: ${userReply}`;
+        const response = await fetch('http://localhost:8001/chat', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json',
+            },
+            body: JSON.stringify({userPrompt: userPrompt}),
+        });
+        if (!response.ok) {
+            throw new Error(`HTTP error! Status: ${response.status}`);
+        }
+
+        const responseData = await response.json();
+
+        if (responseData && responseData.kwargs && responseData.kwargs.content) {
+            const aiResponseContent = responseData.kwargs.content;
+            displayAiResponse(aiResponseContent);
+        } else {
+            console.error('No valid AI response found in the response:', responseData);
+        }
+
+        return responseData.response;
+    } catch (error) {
+        console.error('Error sending chat message:', error);
+        throw error;
+    }
+}
+
+async function retrieveMessage() {
+    userReply.value='';
+    suggestionContainer.style.display = 'none';
+    submitButton.style.display = 'none';
+    firstPrompt.style.display = 'none';
+    try {
+        loadingSpinner.style.display = 'block';
+        messageInput.value = '';
+        userGender.value = '';
+        userLocation.value = '';
+        await sendChatMessage(
+           message,
+            gender,
+        );
+
+
+        // Hide loading spinner and show the reply container
+        loadingSpinner.style.display = 'none';
+        replyContainer.style.display = 'block';
+        container3.style.display = 'block';
+        submitButton.disabled = false;
+        submitButton.style.display = 'inline-block';
+    } catch (error) {
+        console.error('Error sending chat message:', error.message);
+        alert(error.message);
+
+        suggestionContainer.style.display = 'block';
+        // Enable input fields and show submit button
+        loadingSpinner.style.display = 'none';
+        firstPrompt.style.display = 'block';
+        messageInput.disabled = false;
+        userGender.disabled = false;
+        userLocation.disabled = false;
+        submitButton.disabled = false;
+        submitButton.style.display = 'inline-block';
+
+    }
+}
 
 async function fillSuggestions() {
     try {
@@ -59,39 +130,6 @@ function shuffleArray(array) {
     return shuffledArray;
 }
 
-async function sendChatMessage(message, gender, userLocation) {
-    try {
-        const userPrompt = `message: ${message}, gender: ${gender}`
-        const location = `userLocation: ${userLocation}`;
-        const response = await fetch('http://localhost:8001/chat', {
-            method: 'POST',
-            headers: {
-                'Content-Type': 'application/json',
-            },
-            body: JSON.stringify({userPrompt: userPrompt, userLocation: location}),
-        });
-        if (!response.ok) {
-            throw new Error(`HTTP error! Status: ${response.status}`);
-        }
-
-
-        const responseData = await response.json();
-
-        if (responseData && responseData.kwargs && responseData.kwargs.content) {
-            const aiResponseContent = responseData.kwargs.content;
-            displayAiResponse(aiResponseContent);
-        } else {
-            console.error('No valid AI response found in the response:', responseData);
-        }
-
-        return responseData.response;
-    } catch (error) {
-        console.error('Error sending chat message:', error);
-        throw error;
-    }
-}
-
-
 function displayAiResponse(aiResponseContent) {
     const aiMessageContainer = document.createElement('div');
     aiMessageContainer.classList.add('response-grid', 'col-span-3', 'mb-2');
@@ -109,42 +147,6 @@ function displayAiResponse(aiResponseContent) {
 }
 
 
-async function retrieveMessage() {
-    suggestionContainer.style.display = 'none';
-    submitButton.style.display = 'none';
-    firstPrompt.style.display = 'none';
 
-    const message = messageInput.value.trim();
-    const gender = userGender.value.trim();
-    const userLocationValue = userLocation.value.trim();
-
-    try {
-            loadingSpinner.style.display = 'block';
-            messageInput.value = '';
-            userGender.value = '';
-            userLocation.value = '';
-            await sendChatMessage(message, gender, userLocationValue);
-
-            // Hide loading spinner and show the reply container
-            loadingSpinner.style.display = 'none';
-            replyContainer.style.display = 'block';
-            container3.style.display = 'block';
-        submitButton.disabled = false;
-        submitButton.style.display = 'inline-block';
-    } catch (error) {
-        console.error('Error sending chat message:', error.message);
-        alert(error.message);
-
-        // Enable input fields and show submit button
-        loadingSpinner.style.display = 'none';
-        firstPrompt.style.display = 'block';
-        messageInput.disabled = false;
-        userGender.disabled = false;
-        userLocation.disabled = false;
-        submitButton.disabled = false;
-        submitButton.style.display = 'inline-block';
-
-    }
-}
 
 
