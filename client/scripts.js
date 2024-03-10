@@ -5,13 +5,16 @@ const userReply = document.getElementById('userReply');
 const userLocation = document.getElementById('userLocation');
 const submitButton = document.getElementById('submitButton');
 const loadingSpinner = document.getElementById('loadingSpinner');
-const responseContainer = document.getElementById('responseContainer');
+
 const suggestionContainer = document.getElementById('container2');
-const container3 = document.getElementById('container3');
+
 const replyContainer = document.getElementById('replyContainer');
+const combinedContainer = document.getElementById('combinedContainer');
 
 loadingSpinner.style.display = 'none';
 loadingSpinner.style.display = 'items-center';
+
+let messageCounter = parseInt(localStorage.getItem('messageCounter')) || 0;
 
 
 document.addEventListener('keydown', function (event) {
@@ -49,7 +52,7 @@ async function sendChatMessage(message, gender, userLocation, userReply) {
 
         if (responseData && responseData.kwargs && responseData.kwargs.content) {
             const aiResponseContent = responseData.kwargs.content;
-            displayAiResponse(aiResponseContent);
+            displayMessage(aiResponseContent, 'ai');
         } else {
             console.error('No valid AI response found in the response:', responseData);
         }
@@ -74,12 +77,20 @@ async function retrieveMessage() {
             userLocation.value,
             userReply.value
         );
+        messageCounter++;
 
-        // Display AI response
-        displayAiResponse(aiResponseContent);
+        localStorage.setItem('messageCounter', messageCounter.toString());
 
-        // Display user reply
-        displayUserReply(userReply.value);
+        if (messageCounter > 1) {
+            // Display AI response
+            displayMessage(aiResponseContent, 'ai');
+
+            // Display user reply
+            displayMessage(userReply.value, 'user');
+        } else {
+            // Display only AI response for the first message
+            displayMessage(aiResponseContent, 'ai');
+        }
 
         userReply.value = '';
         messageInput.value = '';
@@ -89,7 +100,7 @@ async function retrieveMessage() {
         // Hide loading spinner and show the reply container
         loadingSpinner.style.display = 'none';
         replyContainer.style.display = 'block';
-        container3.style.display = 'block';
+        combinedContainer.style.display = 'block';
         submitButton.disabled = false;
         submitButton.style.display = 'inline-block';
     } catch (error) {
@@ -138,16 +149,15 @@ function shuffleArray(array) {
     return shuffledArray;
 }
 
-function displayAiResponse(aiResponseContent) {
-    const aiMessageContainer = createMessageContainer(aiResponseContent, 'ai');
-    appendToResponseContainer(aiMessageContainer, 'container3', 'ai');
+function displayMessage(content, messageType) {
+    if (typeof content === 'string') {
+        content = content.replace(/^"(.*)"$/, '$1');
 
-}
-
-function displayUserReply(userReplyContent) {
-    const userReplyContainer = createMessageContainer(userReplyContent, 'user');
-    appendToResponseContainer(userReplyContainer, 'container3', 'user');
-
+        const messageContainer = createMessageContainer(content, messageType);
+        appendToResponseContainer(messageContainer, combinedContainer.id, messageType);
+    } else {
+        console.error(`Invalid ${messageType} content:`, content);
+    }
 }
 
 function createMessageContainer(content, messageType) {
@@ -163,6 +173,9 @@ function createMessageContainer(content, messageType) {
     messageText.textContent = content;
     messageContainer.appendChild(messageText);
 
+    // Add a class to distinguish between AI and user messages
+    messageContainer.classList.add(messageType === 'ai' ? 'ai-message' : 'user-message');
+
     return messageContainer;
 }
 
@@ -170,11 +183,18 @@ function appendToResponseContainer(messageContainer, containerId, messageType) {
     const responseContainer = document.getElementById(containerId);
     if (responseContainer) {
         const messageWrapper = document.createElement('div');
-        messageWrapper.classList.add('response-container', messageType);
+        messageWrapper.classList.add('response-container');
+
+        // Add a class to distinguish between AI and user messages
+        messageWrapper.classList.add(messageType === 'ai' ? 'ai-message' : 'user-message');
+
         messageWrapper.appendChild(messageContainer);
-        responseContainer.appendChild(messageWrapper);
+
+        // Append the new message to the beginning of the container
+        responseContainer.insertBefore(messageWrapper, responseContainer.firstChild);
     }
 }
+
 
 
 

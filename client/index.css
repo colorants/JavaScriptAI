@@ -103,3 +103,11 @@ footer {
 .info-container:hover .popup {
     display: block;
 }
+.user-message {
+    justify-self: flex-end;
+    text-align: right;
+}
+
+.user-message i {
+    margin-left: 10px; /* Adjust margin as needed */
+}
