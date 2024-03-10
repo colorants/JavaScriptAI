@@ -48,3 +48,7 @@ To use Fernando, follow these steps:
 5. **Start the Server:**
     - Run `npm run start` to start the server.
     - And go to the client directory and run `npm run start:both` to start the client.
+
+## 🆘 For Issues
+
+If you encounter any issues, please open an issue on the GitHub repository. 
